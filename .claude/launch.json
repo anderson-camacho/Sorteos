@@ -1,0 +1,11 @@
+﻿{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sorteo",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["C:/Users/ander/AppData/Local/Temp/claude/D--github-Sorteo/083b67f6-938f-4840-9c3d-a823c35dd702/scratchpad/serve.js"],
+      "port": 8791
+    }
+  ]
+}
