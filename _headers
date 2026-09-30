@@ -1,10 +1,12 @@
 /participantes.json
   Cache-Control: no-cache, max-age=0, must-revalidate
+  Access-Control-Allow-Origin: *
 
 /index.html
   Cache-Control: no-cache, max-age=0, must-revalidate
 
 /*
-  Content-Security-Policy: frame-ancestors 'self' https://anncrochet.com https://www.anncrochet.com https://*.myshopify.com https://admin.shopify.com
+  Content-Security-Policy: frame-ancestors 'self' https://anncrochet.com https://www.anncrochet.com https://*.myshopify.com https://admin.shopify.com https://online-store-web.shopifyapps.com
   X-Content-Type-Options: nosniff
+  X-Robots-Tag: noindex
   Referrer-Policy: strict-origin-when-cross-origin

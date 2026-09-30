@@ -1,63 +1,71 @@
 # Gran Sorteo · Ann Crochet
 
-Página **autocontenida** (un solo `index.html`, sin backend) para:
+Página **autocontenida** (un solo `index.html` + `participantes.json`, sin backend) para el sorteo del **Sweater Alma**:
 
-1. **Verificar inscripción** — cada persona escanea el QR, busca su nombre y ve cuántas boletas tiene.
-2. **La ruleta** — sorteo ponderado por boletas (5 boletas = 5 veces más probabilidad), con conteo regresivo, redoble, fanfarria estilo Bridgerton, carta de Lady Whistledown y confeti de crochet.
-3. **Organizador** — agregar nombres y boletas (uno a uno o pegando una lista), generar el QR, copiar el enlace, descargar/importar `participantes.json`.
+1. **Verifica tu inscripción** — cada persona escanea el QR, busca su nombre y ve sus boletas y su **porcentaje real de probabilidad** (boletas ÷ total). Debajo, la tabla de probabilidades ordenada de mayor a menor.
+2. **La ruleta** — sorteo ponderado por boletas con `crypto.getRandomValues` (sin sesgo), conteo 3-2-1, "La Primavera" de Vivaldi en clavecín sintetizado, redoble, fanfarria, carta de *Lady Ovillo* con sello de lacre, borde de puntos que se teje solo y confeti de crochet. Queda un **acta** con boleta ganadora, hora y huella SHA-256 de la lista.
+3. **Organizador** — pegar la lista (cada nombre repetido = una boleta más), editar, generar QR, copiar enlace, descargar/importar `participantes.json`.
 
-## Subir a Cloudflare (2 minutos)
+Diseño: paleta real de la marca (lila `#CEA1DD`, ciruela `#54274F`, orquídea `#BC5FB4`, salvia `#B1D8B7`), fuentes Cormorant Garamond + Assistant + Pinyon Script, detalles de crochet en SVG procedural (ovillo, hebra, flor, picots, cadeneta).
 
-1. Entra a <https://dash.cloudflare.com> → **Workers & Pages** → **Create** → pestaña **Pages** → **Upload assets**.
-2. Nombre del proyecto: `sorteo-anncrochet` (la URL queda `https://sorteo-anncrochet.pages.dev`).
-3. Arrastra **la carpeta completa** de este proyecto (o selecciona `index.html`, `participantes.json` y `_headers`).
-4. **Deploy site**. Listo.
+## Subir a Cloudflare Pages (2 minutos)
 
-Para actualizar (por ejemplo con la lista definitiva): en el proyecto → **Create new deployment** → arrastra la carpeta otra vez.
+1. <https://dash.cloudflare.com> → **Workers & Pages** → **Create** → pestaña **Pages** → **Upload assets**.
+2. Nombre del proyecto: `sorteo-anncrochet` → URL `https://sorteo-anncrochet.pages.dev`.
+3. Arrastra la carpeta con `index.html`, `participantes.json` y `_headers` → **Deploy site**.
 
-Alternativa por consola:
+Para actualizar la lista: descarga `participantes.json` desde Organizador, reemplázalo en la carpeta y en el proyecto → **Create new deployment** → arrastra la carpeta otra vez (hay que subir la carpeta completa; no se reemplazan archivos sueltos).
+
+Por consola:
 
 ```bash
 npx wrangler pages deploy . --project-name sorteo-anncrochet
 ```
 
-## Cómo cargar los participantes
+Subdominio propio (`sorteo.anncrochet.com`): el dominio ya usa nameservers de Cloudflare, así que en el proyecto → **Custom domains** → **Set up a domain** → `sorteo.anncrochet.com` y Cloudflare crea el CNAME solo.
 
-**Opción A — rápida (solo un dispositivo):** abre la página → abajo **Organizador** → agrega los nombres. Quedan guardados en ese navegador y viajan dentro del enlace/QR que generas (cabe hasta ~80-100 nombres en un QR).
+## Datos
 
-**Opción B — para todos los dispositivos:** en Organizador → **Descargar participantes.json** → reemplaza el archivo `participantes.json` de la carpeta y vuelve a desplegar en Cloudflare. Así el QR puede ser simplemente la URL de la página y cualquiera verá la lista completa.
-
-Formato de `participantes.json`:
+`participantes.json` (los nombres se guardan **tal como los envió cada persona**):
 
 ```json
-[
-  { "n": "Ana María Ramírez", "t": 15 },
-  { "n": "Carolina Gómez", "t": 10 }
-]
+{
+  "premio": "Sweater Alma",
+  "generado": "2026-09-30T23:30:00.000Z",
+  "participantes": [
+    { "n": "ana osorio", "t": 8 },
+    { "n": "Yusmila novo", "t": 7 }
+  ]
+}
 ```
 
-## Incrustar en Shopify (anncrochet.com)
+Prioridad al cargar: enlace con `#d=` (QR con lista incluida) → lista guardada en el dispositivo si es más reciente que `generado` → `participantes.json`.
 
-El tema es **Dawn**. Dos formas:
+Importante: dentro de un iframe (Shopify) y en los celulares del público solo se ve `participantes.json`; por eso la lista definitiva debe publicarse en Cloudflare.
 
-**1. Página con iframe** (Online Store → Pages → nueva página → botón `<>` para ver HTML):
+## Incrustar en Shopify (anncrochet.com, tema Dawn)
+
+Online Store → Themes → **Customize** → Add section → **Custom Liquid**, y pega:
 
 ```html
-<iframe src="https://sorteo-anncrochet.pages.dev" title="Gran Sorteo Ann Crochet"
-  style="width:100%;height:100vh;min-height:720px;border:0;border-radius:16px"
-  allow="fullscreen; autoplay; clipboard-write" allowfullscreen loading="lazy"></iframe>
+<iframe src="https://sorteo-anncrochet.pages.dev/?embed=1" title="Gran Sorteo Ann Crochet"
+  style="display:block;width:100%;border:0;min-height:720px;border-radius:16px"
+  allow="fullscreen; autoplay; screen-wake-lock; clipboard-write" allowfullscreen loading="lazy"></iframe>
+<script>
+addEventListener('message', function (e) {
+  if (e.origin !== 'https://sorteo-anncrochet.pages.dev' || !e.data || e.data.type !== 'ann-sorteo:height') return;
+  var f = document.querySelector('iframe[src^="https://sorteo-anncrochet.pages.dev"]'); if (f) f.style.height = e.data.height + 'px';
+});
+</script>
 ```
 
-**2. Sección Custom Liquid** (Personalizar tema → Agregar sección → *Liquid personalizado*) con el mismo `<iframe>`.
+`_headers` ya permite que `anncrochet.com`, `*.myshopify.com` y el editor de temas incrusten la página. En modo embed aparece el botón "Abrir en pantalla completa" (sonido y pantalla completa pueden estar limitados dentro del iframe).
 
-El archivo `_headers` ya permite que `anncrochet.com` y `*.myshopify.com` incrusten la página. Para un subdominio propio (`sorteo.anncrochet.com`): en el proyecto de Pages → **Custom domains** → agregar, y crear el CNAME que indica Cloudflare en el DNS del dominio.
+## Presentar en TV
 
-## Atajos
-
-- `Espacio` o `Enter` en la ruleta: girar.
-- `Esc`: cerrar la carta del ganador.
-- Botón **Pantalla completa** para proyectar en TV.
-- URL con `#admin` abre directo el panel del organizador.
+- Botón **Modo TV** (o `?modo=tv`, o tecla `T`): tipografía a escala de la pantalla, zona segura del 5 %, foco visible para control remoto (flechas + OK).
+- **Pantalla completa** (`F`), silencio (`M`), girar (`Espacio`), cerrar carta (`Esc` / Back).
+- Mantiene la pantalla encendida durante el giro (Wake Lock).
 
 ## Nota legal
 
