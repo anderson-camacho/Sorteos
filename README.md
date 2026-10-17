@@ -4,15 +4,58 @@ Página **autocontenida** (un solo `index.html` + `participantes.json`, sin back
 
 1. **Verifica tu inscripción** — cada persona escanea el QR, busca su nombre y ve sus boletas y su **porcentaje real de probabilidad** (boletas ÷ total). Debajo, la tabla de probabilidades ordenada de mayor a menor.
 2. **La ruleta** — sorteo ponderado por boletas con `crypto.getRandomValues` (sin sesgo), conteo 3-2-1, "La Primavera" de Vivaldi en clavecín sintetizado, redoble, fanfarria, carta de *Lady Ovillo* con sello de lacre, borde de puntos que se teje solo y confeti de crochet. Queda un **acta** con boleta ganadora, hora y huella SHA-256 de la lista.
-3. **Organizador** — pegar la lista (cada nombre repetido = una boleta más), editar, generar QR, copiar enlace, descargar/importar `participantes.json`.
+3. **Eliminación** — ruleta aparte, con estado propio: cada giro borra la casilla donde cae hasta que quedan los sobrevivientes elegidos.
+4. **Organizador** — pegar la lista (cada nombre repetido = una boleta más), editar, generar QR, copiar enlace, descargar/importar `participantes.json`.
 
 Diseño: paleta real de la marca (lila `#CEA1DD`, ciruela `#54274F`, orquídea `#BC5FB4`, salvia `#B1D8B7`), fuentes Cormorant Garamond + Assistant + Pinyon Script, detalles de crochet en SVG procedural (ovillo, hebra, flor, picots, cadeneta).
+
+## Cómo usarlo
+
+### Abrirlo en tu computador
+
+Con doble clic (`file://`) no funciona: el navegador bloquea la carga de `participantes.json` y la ruleta queda vacía. Levanta un servidor local en la carpeta del proyecto:
+
+```bash
+npx serve -l 8791 .
+```
+
+Abre <http://localhost:8791>. Sin Node también sirve `python -m http.server 8791`.
+
+### La ruleta (sorteo normal)
+
+- Cada boleta es una casilla: quien tiene 2 boletas aparece 2 veces.
+- **Girar la ruleta** (o `Espacio`) elige al ganador.
+- **Quitar ganador** lo saca de la ruleta antes del siguiente premio.
+
+### Eliminación
+
+Es independiente: no cambia la ruleta normal ni `participantes.json`.
+
+1. Elige cuántos **Sobrevivientes** quieres (por defecto 10, como máximo el número de participantes).
+2. **Revolver** mezcla las casillas.
+3. **Eliminar** (o `Espacio`) gira y borra **solo la casilla donde cae**. Con 2 boletas, una persona aguanta 2 golpes y sale al perder la última; junto a cada nombre se ve cuántas le quedan (`×2`, `×1`).
+4. Cuando quedan tantas personas como sobrevivientes, se marcan como **ganadores** y suena el sonido de ganador.
+5. **Nueva ronda** vuelve a cargar la lista completa.
+
+### Sonidos
+
+Los mp3 no están en el repositorio (`Sonidos/` está en `.gitignore`). Cópialos a la carpeta `Sonidos/` con estos nombres exactos:
+
+| Archivo | Cuándo suena |
+| --- | --- |
+| `Sonido de ganador Efecto de sonido.mp3` | Al terminar la eliminación |
+| `Sonido de perdedor Efecto de sonido.mp3` | Al borrar una casilla (uno de estos 4 al azar) |
+| `Efecto de sonido triste sound effect sad.mp3` | Al borrar una casilla |
+| `Krillin gritando del dolor • SFX Sonidos de efectos.mp3` | Al borrar una casilla |
+| `No tio no aah!! - efecto sonido.mp3` | Al borrar una casilla |
+
+Si falta alguno, la ruleta funciona igual, solo que ese sonido no suena. La tecla `M` o el botón **Sonido** silencian todo.
 
 ## Subir a Cloudflare Pages (2 minutos)
 
 1. <https://dash.cloudflare.com> → **Workers & Pages** → **Create** → pestaña **Pages** → **Upload assets**.
 2. Nombre del proyecto: `sorteo-anncrochet` → URL `https://sorteo-anncrochet.pages.dev`.
-3. Arrastra la carpeta con `index.html`, `participantes.json` y `_headers` → **Deploy site**.
+3. Arrastra la carpeta con `index.html`, `participantes.json`, `_headers` y la carpeta `Sonidos/` → **Deploy site**.
 
 Para actualizar la lista: descarga `participantes.json` desde Organizador, reemplázalo en la carpeta y en el proyecto → **Create new deployment** → arrastra la carpeta otra vez (hay que subir la carpeta completa; no se reemplazan archivos sueltos).
 

@@ -3,3 +3,5 @@ Thumbs.db
 node_modules/
 .wrangler/
 *.log
+# los mp3 se agregan a mano (ver README → Sonidos)
+Sonidos/
